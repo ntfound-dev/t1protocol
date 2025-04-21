@@ -1,9 +1,8 @@
-#!/usr/bin/env python3
-
+import DXJCOMMUNITY
 import os
 import re
 import json
-import sys # Diperlukan untuk sys.exit pada KeyboardInterrupt
+import sys 
 import traceback
 from decimal import Decimal, InvalidOperation
 from dotenv import load_dotenv
@@ -12,6 +11,7 @@ from web3.middleware import ExtraDataToPOAMiddleware
 from web3.exceptions import TransactionNotFound, ContractLogicError
 import time
 import colorama
+from DXJCOMMUNITY from print_logo
 from colorama import Fore, Style, Back
 
 # --- Inisialisasi Colorama ---
