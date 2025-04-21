@@ -20,7 +20,7 @@ This Python script provides a text-based command-line menu interface to facilita
 ## Setup / Installation
 
 1.  **Clone or Download:**
-    * If this is a Git repository: `git clone <your_repository_url>`
+    * If this is a Git repository: `git clone https://github.com/ntfound-dev/t1protocol.git`
     * Or, download the Python script file (e.g., `main_bridge_menu_final.py`) to your local directory.
 
 2.  **Navigate to Project Directory:**
