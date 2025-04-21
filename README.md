@@ -61,7 +61,7 @@ This Python script provides a text-based command-line menu interface to facilita
 
 1.  **Run the Script:** Open your terminal or command prompt in the project directory, then run:
     ```bash
-    python main_bridge_menu_final.py
+    python main.py
     ```
     *(Replace `main_bridge_menu_final.py` if you named the Python file differently)*
 
