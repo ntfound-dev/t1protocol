@@ -11,7 +11,7 @@ from web3.middleware import ExtraDataToPOAMiddleware
 from web3.exceptions import TransactionNotFound, ContractLogicError
 import time
 import colorama
-from DXJCOMMUNITY from print_logo
+from DXJCOMMUNITY import print_logo
 from colorama import Fore, Style, Back
 
 # --- Inisialisasi Colorama ---
