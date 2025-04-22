@@ -1,8 +1,7 @@
-import DXJCOMMUNITY
 import os
 import re
 import json
-import sys 
+import sys
 import traceback
 from decimal import Decimal, InvalidOperation
 from dotenv import load_dotenv
@@ -11,20 +10,32 @@ from web3.middleware import ExtraDataToPOAMiddleware
 from web3.exceptions import TransactionNotFound, ContractLogicError
 import time
 import colorama
-from DXJCOMMUNITY import print_logo
 from colorama import Fore, Style, Back
+
+# --- Impor Logo Kustom Anda ---
+try:
+    # Asumsikan DXJCOMMUNITY.py ada di direktori yang sama atau terinstal
+    from DXJCOMMUNITY import print_logo
+except ImportError:
+    # Fallback jika modul tidak ditemukan
+    def print_logo():
+        print(Fore.MAGENTA + Style.BRIGHT + "=" * 40)
+        print(Fore.MAGENTA + Style.BRIGHT + "===      LOGO ANDA DI SINI       ===")
+        print(Fore.MAGENTA + Style.BRIGHT + "=" * 40)
+        print(Fore.YELLOW + "Peringatan: Modul DXJCOMMUNITY tidak ditemukan.")
 
 # --- Inisialisasi Colorama ---
 colorama.init(autoreset=True)
 
 # --- Definisi Warna ---
 C_TITLE = Fore.CYAN + Style.BRIGHT
+C_LOGO = Fore.MAGENTA + Style.BRIGHT # Warna khusus untuk logo jika fallback
 C_MENU_OPTION = Fore.GREEN
 C_COMING_SOON = Fore.YELLOW
 C_EXIT_OPTION = Fore.YELLOW + Style.BRIGHT
 C_SEPARATOR = Fore.WHITE + Style.DIM
 C_PROMPT = Fore.WHITE + Style.BRIGHT
-C_INPUT = Fore.WHITE # Warna setelah prompt input
+C_INPUT = Fore.WHITE
 C_INFO = Fore.BLUE
 C_SUCCESS = Fore.GREEN + Style.BRIGHT
 C_WARNING = Fore.YELLOW + Style.BRIGHT
@@ -62,7 +73,7 @@ LANG_TEXT = {
     'id': {
         'lang_prompt': "Pilih bahasa (id/en): ",
         'invalid_lang': "Pilihan bahasa tidak valid.",
-        'lang_selected': "Bahasa dipilih: {}", # Kunci baru
+        'lang_selected': "Bahasa dipilih: {}",
         'menu_title': "===== DEVNET T1 PROTOCOL BRIDGE MENU =====",
         'menu_opt1': "1. Bridge Sepolia (L1) -> T1 Protokol (L2)",
         'menu_opt2': "2. Bridge T1 Protokol (L2) -> Sepolia (L1) (Segera Hadir)",
@@ -75,7 +86,7 @@ LANG_TEXT = {
         'coming_soon': "\nFitur ini belum tersedia...",
         'option_disabled': "Opsi ini sedang dinonaktifkan menunggu update.",
         'exiting': "\nTerima kasih! Keluar dari program.",
-        'exit_interrupt': "\nProgram dihentikan oleh pengguna (Ctrl+C).", # Kunci baru
+        'exit_interrupt': "\nProgram dihentikan oleh pengguna (Ctrl+C).",
         'press_enter': "\nTekan Enter untuk kembali ke menu...",
         'config_ok': "Konfigurasi awal dibaca...",
         'config_fail': "Error Fatal: PRIVATE_KEY tidak ada atau formatnya salah di .env",
@@ -105,12 +116,12 @@ LANG_TEXT = {
         'l1l2_amount_invalid': "[!] Input tidak valid. Masukkan angka.",
         'l1l2_tx_prep': "\n== Mempersiapkan Transaksi sendMessage L1 -> L2 ==",
         'l1l2_param_title': "\nParameter Transaksi L1 -> L2:",
-        'l1l2_param_bridge_amount': "  Jumlah Bridge: {} ETH",
-        'l1l2_param_l2_gas': "  Gas Limit L2: {}",
-        'l1l2_param_l2_fee': "  Fee Tambahan: {} ETH",
-        'l1l2_param_total': "  TOTAL VALUE Tx L1: {} ETH",
+        'l1l2_param_bridge_amount': "  Jumlah Bridge: {} ETH",
+        'l1l2_param_l2_gas': "  Gas Limit L2: {}",
+        'l1l2_param_l2_fee': "  Fee Tambahan: {} ETH",
+        'l1l2_param_total': "  TOTAL VALUE Tx L1: {} ETH",
         'l1_estimating_gas': "\nMemperkirakan gas L1...",
-        'l1_gas_limit': "  Gas limit L1: {}",
+        'l1_gas_limit': "  Gas limit L1: {}",
         'l1_getting_gas_price': "\nMendapatkan harga gas L1...",
         'l1_checking_balance': "\nMengecek saldo L1...",
         'l1_balance_nok': "ERROR L1: Saldo tidak cukup! Perlu: ~{:.8f} ETH",
@@ -139,7 +150,7 @@ LANG_TEXT = {
     'en': {
         'lang_prompt': "Select language (id/en): ",
         'invalid_lang': "Invalid language selection.",
-        'lang_selected': "Language set to: {}", # New key
+        'lang_selected': "Language set to: {}",
         'menu_title': "===== DEVNET T1 PROTOCOL BRIDGE MENU =====",
         'menu_opt1': "1. Bridge Sepolia (L1) -> T1 Protocol (L2)",
         'menu_opt2': "2. Bridge T1 Protocol (L2) -> Sepolia (L1) (Coming Soon)",
@@ -152,7 +163,7 @@ LANG_TEXT = {
         'coming_soon': "\nThis feature is not available yet...",
         'option_disabled': "This option is currently disabled pending developer updates.",
         'exiting': "\nThank you! Exiting program.",
-        'exit_interrupt': "\nProgram interrupted by user (Ctrl+C).", # New key
+        'exit_interrupt': "\nProgram interrupted by user (Ctrl+C).",
         'press_enter': "\nPress Enter to return to the menu...",
         'config_ok': "Initial configuration read...",
         'config_fail': "Fatal Error: PRIVATE_KEY missing or invalid format in .env",
@@ -182,12 +193,12 @@ LANG_TEXT = {
         'l1l2_amount_invalid': "[!] Invalid input. Please enter a number.",
         'l1l2_tx_prep': "\n== Preparing sendMessage Transaction L1 -> L2 ==",
         'l1l2_param_title': "\nL1 -> L2 Transaction Parameters:",
-        'l1l2_param_bridge_amount': "  Bridge Amount: {} ETH",
-        'l1l2_param_l2_gas': "  L2 Gas Limit: {}",
-        'l1l2_param_l2_fee': "  Additional Fee: {} ETH",
-        'l1l2_param_total': "  TOTAL L1 Tx VALUE: {} ETH",
+        'l1l2_param_bridge_amount': "  Bridge Amount: {} ETH",
+        'l1l2_param_l2_gas': "  L2 Gas Limit: {}",
+        'l1l2_param_l2_fee': "  Additional Fee: {} ETH",
+        'l1l2_param_total': "  TOTAL L1 Tx VALUE: {} ETH",
         'l1_estimating_gas': "\nEstimating L1 gas...",
-        'l1_gas_limit': "  L1 gas limit: {}",
+        'l1_gas_limit': "  L1 gas limit: {}",
         'l1_getting_gas_price': "\nGetting L1 gas price...",
         'l1_checking_balance': "\nChecking L1 balance...",
         'l1_balance_nok': "ERROR L1: Insufficient balance! Required: ~{:.8f} ETH",
@@ -220,10 +231,8 @@ def get_text(key, lang=None, default=""):
     """Mengambil teks berdasarkan kunci dan bahasa terpilih, dengan fallback."""
     lang_to_use = lang if lang else selected_lang
     try:
-        # Coba bahasa dipilih -> lalu english -> lalu default string
         return LANG_TEXT[lang_to_use].get(key, LANG_TEXT['en'].get(key, default if default else f"<{key}_NOT_FOUND>"))
     except KeyError:
-        # Jika bahasa terpilih tidak ada sama sekali (seharusnya tidak terjadi)
         return LANG_TEXT['en'].get(key, default if default else f"<{key}_NOT_FOUND>")
 
 
@@ -236,7 +245,6 @@ def bridge_sepolia_to_t1():
 
     # --- Validasi Input Khusus L1->L2 ---
     print(C_INFO + get_text('l1l2_validating'))
-    # Gunakan nama var dari .env yang dibaca di awal
     if not all([SEPOLIA_RPC_URL, L1_CONTRACT_ADDR_STR, DEST_CHAIN_ID_FOR_L1_TX, L2_RECIPIENT_ADDR_STR]):
         print(C_ERROR + get_text('l1l2_env_error'))
         return
@@ -244,7 +252,7 @@ def bridge_sepolia_to_t1():
     try:
         l1_contract_address = Web3.to_checksum_address(L1_CONTRACT_ADDR_STR)
         l2_recipient_address = Web3.to_checksum_address(L2_RECIPIENT_ADDR_STR)
-        destination_chain_id = int(DEST_CHAIN_ID_FOR_L1_TX) # Ini adalah ID T1 L2
+        destination_chain_id = int(DEST_CHAIN_ID_FOR_L1_TX)
         print(f"  {get_text('l1_contract_addr').format(C_INFO + str(l1_contract_address))}")
         print(f"  {get_text('l2_recipient_addr').format(C_INFO + str(l2_recipient_address))}")
         print(f"  {get_text('l2_dest_chain_id').format(C_INFO + str(destination_chain_id))}")
@@ -417,7 +425,17 @@ def bridge_t1_to_sepolia():
     print(C_TITLE + get_text('l2l1_title'))
     print(C_DISABLED + get_text('l2l1_disabled_info'))
     print(C_SEPARATOR + get_text('separator_line'))
-    # !!! NANTI ISI DENGAN LOGIKA L2->L1 SETELAH DAPAT ABI & INFO !!!
+    # --- Tempat Anda memasukkan logika L2->L1 nanti ---
+    # 1. Validasi .env L2->L1
+    # 2. Connect Web3 ke T1_L2_RPC_URL
+    # 3. Setup Akun L2
+    # 4. Load ABI Kontrak L2 (l2_contract_abi_str)
+    # 5. Input jumlah penarikan
+    # 6. Persiapan parameter (sesuai fungsi L2 yang benar)
+    # 7. Estimasi gas L2, cek saldo L2
+    # 8. Build, sign, send Tx L2
+    # 9. Tunggu receipt L2
+    # 10. Beri info tentang masa tunggu & klaim L1
 
 
 # -----------------------------------------------------
@@ -425,6 +443,14 @@ def bridge_t1_to_sepolia():
 # -----------------------------------------------------
 def display_menu():
     """Menampilkan menu pilihan kepada pengguna."""
+    os.system('cls' if os.name == 'nt' else 'clear')
+    try:
+        print_logo() # Panggil logo kustom Anda
+    except NameError:
+        print(f"{C_ERROR}Error: Fungsi 'print_logo' tidak ditemukan.")
+    except Exception as logo_err:
+        print(f"{C_ERROR}Error saat mencetak logo: {logo_err}")
+
     print(f"\n{C_TITLE}{get_text('menu_title')}")
     print(f"  {C_MENU_OPTION}{get_text('menu_opt1')}")
     print(f"  {C_COMING_SOON}{get_text('menu_opt2')}")
@@ -460,7 +486,7 @@ def main():
     select_language()
 
     while True:
-        os.system('cls' if os.name == 'nt' else 'clear')
+        # Pindah clear screen ke display_menu
         display_menu()
         choice = input(f"{C_PROMPT}{get_text('enter_choice')}{C_INPUT}")
 
@@ -468,7 +494,7 @@ def main():
             bridge_sepolia_to_t1()
         elif choice == '2':
             print(C_COMING_SOON + get_text('coming_soon')) # Opsi 2 dinonaktifkan
-            # bridge_t1_to_sepolia() # Panggil ini jika sudah siap
+            # bridge_t1_to_sepolia() # Aktifkan ini jika sudah siap
         elif choice == '3':
             print(C_COMING_SOON + get_text('coming_soon'))
         elif choice == '0':
@@ -478,7 +504,6 @@ def main():
             print(C_ERROR + get_text('invalid_choice'))
 
         # Beri jeda agar pengguna bisa membaca output
-        # Tambahkan warna pada prompt Enter juga
         input(f"\n{C_PROMPT}{get_text('press_enter')}{C_RESET}")
 
 # -----------------------------------------------------
@@ -487,23 +512,21 @@ def main():
 if __name__ == "__main__":
     # Validasi awal yang krusial
     if not RAW_PRIV_KEY or len(PRIVATE_KEY_HEX) != 66:
-         print(C_ERROR + LANG_TEXT['en']['config_fail']) # Pakai English untuk error fatal ini
+         print(C_ERROR + get_text('config_fail', lang='en')) # Error fatal pakai English
          exit(1)
-    print(C_INFO + "Reading initial configuration...") # Pakai English
+    print(C_INFO + get_text('config_ok', lang='en')) # Pesan awal pakai English
 
     try:
         main() # Jalankan loop utama
     except KeyboardInterrupt:
-        # Tangkap Ctrl+C di mana saja dalam loop utama
+        # Tangkap Ctrl+C
         print("\n" + C_WARNING + get_text('exit_interrupt'))
         try:
-            # Coba keluar dengan cara yang lebih standar
             sys.exit(0)
         except SystemExit:
-            # Tangkap jika sys.exit() sendiri menimbulkan masalah (jarang terjadi)
             os._exit(0)
     except Exception as e:
-        # Tangkap error tak terduga lainnya di level tertinggi
+        # Tangkap error tak terduga lainnya
         print(f"\n{C_ERROR}An unexpected fatal error occurred:")
         traceback.print_exc()
         sys.exit(1)
