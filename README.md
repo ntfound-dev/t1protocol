@@ -24,7 +24,7 @@ This Python script provides a text-based command-line menu interface to facilita
 
 2.  **Navigate to Project Directory:**
     ```bash
-    cd <your_project_directory_name>
+    cd t1protocol
     ```
 
 3.  **Install Dependencies:**
